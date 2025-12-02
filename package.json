@@ -1,0 +1,77 @@
+{
+  "name": "focusmode-student-learning",
+  "version": "1.0.0",
+  "description": "Aplikasi FocusMode untuk membantu siswa belajar tanpa gangguan",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "node server.js",
+    "api": "node start-app.js",
+    "dev": "npm run api",
+    "start-dev": "webpack serve --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js",
+    "build-dev": "webpack --config webpack.dev.js",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "rm -rf dist",
+    "build:clean": "npm run clean && npm run build",
+    "dev-full": "concurrently \"npm run api\" \"npm run start-dev\"",
+    "fullstack": "concurrently \"npm run api\" \"npm run start-dev\""
+  },
+  "keywords": [
+    "pwa",
+    "focus",
+    "study",
+    "productivity",
+    "education",
+    "student",
+    "learning"
+  ],
+  "author": "Student Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "babel-loader": "^9.1.0",
+    "bcryptjs": "^2.4.3",
+    "concurrently": "^9.2.1",
+    "copy-webpack-plugin": "^13.0.1",
+    "cors": "^2.8.5",
+    "css-loader": "^6.8.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^8.8.0",
+    "express": "^4.21.2",
+    "html-webpack-plugin": "^5.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "mini-css-extract-plugin": "^2.7.0",
+    "mysql2": "^3.15.3",
+    "prettier": "^2.8.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.88.0",
+    "webpack-cli": "^5.1.0",
+    "webpack-dev-server": "^4.15.0",
+    "webpack-merge": "^5.9.0",
+    "workbox-webpack-plugin": "^7.3.0"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "helmet": "^7.0.0",
+    "idb": "^7.1.1",
+    "web-push": "^3.6.7"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/focusmode-student-learning.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/focusmode-student-learning/issues"
+  },
+  "homepage": "https://github.com/your-username/focusmode-student-learning#readme"
+}

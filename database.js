@@ -1,43 +1,71 @@
 import pkg from 'pg';
 const { Pool } = pkg;
+import dotenv from "dotenv"
+
+// Load environment variables from .env file
+dotenv.config()
+
+const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, PGSSLMODE } = process.env;
 
 class Database {
   constructor() {
     this.pool = null;
-    
-    // Konfigurasi Neon PostgreSQL
+
     this.config = {
-      connectionString: 'postgresql://neondb_owner:npg_gbS0enzEZTq5@ep-patient-mountain-a145nmbc-pooler.ap-southeast-1.aws.neon.tech/neondb',
-      ssl: {
-        rejectUnauthorized: false,
-        require: true
-      },
+      host: PGHOST,
+      database: PGDATABASE,
+      port: 5432,
+      user: PGUSER,
+      password: PGPASSWORD,
+      ssl:
+        PGSSLMODE === 'require'
+          ? {
+              rejectUnauthorized: false,
+              require: true,
+            }
+          : false,
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 5000,
       statement_timeout: 5000,
       query_timeout: 10000,
-      application_name: 'focusmode-app'
+      application_name: 'focusmode-app',
     };
   }
 
   async connect() {
     try {
+      if (
+        !PGHOST ||
+        !PGDATABASE ||
+        !PGUSER ||
+        !PGPASSWORD
+      ) {
+        throw new Error(
+          'Missing required PostgreSQL environment variables. Please check your .env file for PGHOST, PGDATABASE, PGUSER, and PGPASSWORD.'
+        );
+      }
+
       console.log('🔧 Mencoba koneksi ke PostgreSQL Neon...');
-      console.log('🔗 Connection URL:', this.config.connectionString.replace(/:[^:@]*@/, ':****@'));
-      
+      console.log('🔗 Host:', PGHOST);
+
       this.pool = new Pool(this.config);
-      
+
       // Test connection
       const client = await this.pool.connect();
-      
+
       try {
-        const result = await client.query('SELECT version() as version, NOW() as now');
+        const result = await client.query(
+          'SELECT version() as version, NOW() as now'
+        );
         console.log('✅ BERHASIL terhubung ke PostgreSQL Neon!');
-        console.log('🐘 PostgreSQL Version:', result.rows[0].version.split(',')[0]);
+        console.log(
+          '🐘 PostgreSQL Version:',
+          result.rows[0].version.split(',')[0]
+        );
         console.log('⏰ Server time:', result.rows[0].now);
         console.log('🚀 Server siap menerima koneksi API');
-        
+
         return this.pool;
       } finally {
         client.release();
@@ -46,7 +74,7 @@ class Database {
       console.error('❌ Database connection failed:', error.message);
       console.log('\n🔧 SOLUSI:');
       console.log('1. Periksa koneksi internet Anda');
-      console.log('2. Verifikasi connection string di dashboard.neon.tech');
+      console.log('2. Verifikasi connection details di dashboard.neon.tech');
       console.log('3. Pastikan database "neondb" sudah dibuat di Neon');
       console.log('4. Jalankan: npm run setup-db untuk membuat tabel');
       console.log('5. Periksa apakah IP Anda diizinkan oleh Neon');
@@ -93,10 +121,9 @@ class Database {
     const result = await this.query(sql, [name, email, password, avatar]);
 
     // Create default settings for user
-    await this.query(
-      'INSERT INTO user_settings (user_id) VALUES ($1)',
-      [result[0].id]
-    );
+    await this.query('INSERT INTO user_settings (user_id) VALUES ($1)', [
+      result[0].id,
+    ]);
 
     return result[0].id;
   }
@@ -165,7 +192,7 @@ class Database {
       SET title = $1, description = $2, subject = $3, duration = $4, status = $5 
       WHERE id = $6
     `;
-    let params = [title, description, subject, duration, status, id];
+    const params = [title, description, subject, duration, status, id];
 
     if (userId) {
       sql += ' AND user_id = $7';
@@ -177,7 +204,7 @@ class Database {
 
   async deleteSession(id, userId = null) {
     let sql = 'DELETE FROM study_sessions WHERE id = $1';
-    let params = [id];
+    const params = [id];
 
     if (userId) {
       sql += ' AND user_id = $2';
@@ -193,7 +220,7 @@ class Database {
       SET status = 'inprogress', started_at = NOW() 
       WHERE id = $1
     `;
-    let params = [id];
+    const params = [id];
 
     if (userId) {
       sql += ' AND user_id = $2';
@@ -209,7 +236,7 @@ class Database {
       SET status = 'completed', completed_at = NOW() 
       WHERE id = $1
     `;
-    let params = [id];
+    const params = [id];
 
     if (userId) {
       sql += ' AND user_id = $2';
@@ -222,7 +249,7 @@ class Database {
   // Notes operations
   async getNotesByUserId(userId, category = 'all') {
     let sql = 'SELECT * FROM notes WHERE user_id = $1';
-    let params = [userId];
+    const params = [userId];
 
     if (category !== 'all') {
       sql += ' AND category = $2';
@@ -251,7 +278,7 @@ class Database {
       SET title = $1, content = $2, category = $3 
       WHERE id = $4
     `;
-    let params = [title, content, category, id];
+    const params = [title, content, category, id];
 
     if (userId) {
       sql += ' AND user_id = $5';
@@ -263,7 +290,7 @@ class Database {
 
   async deleteNote(id, userId = null) {
     let sql = 'DELETE FROM notes WHERE id = $1';
-    let params = [id];
+    const params = [id];
 
     if (userId) {
       sql += ' AND user_id = $2';
@@ -315,7 +342,7 @@ class Database {
       SET title = $1, author = $2, description = $3, category = $4, is_complete = $5 
       WHERE id = $6
     `;
-    let params = [title, author, description, category, is_complete, id];
+    const params = [title, author, description, category, is_complete, id];
 
     if (userId) {
       sql += ' AND user_id = $7';
@@ -327,7 +354,7 @@ class Database {
 
   async deleteBook(id, userId = null) {
     let sql = 'DELETE FROM books WHERE id = $1';
-    let params = [id];
+    const params = [id];
 
     if (userId) {
       sql += ' AND user_id = $2';
@@ -343,7 +370,7 @@ class Database {
       SET is_complete = NOT is_complete, updated_at = NOW() 
       WHERE id = $1
     `;
-    let params = [id];
+    const params = [id];
 
     if (userId) {
       sql += ' AND user_id = $2';
